@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Team members</title>
+    <style>
+        :root {
+            --bg: #f3f5f7;
+            --panel: #ffffff;
+            --text: #1f2933;
+            --muted: #6b7785;
+            --line: #dde3ea;
+            --accent: #2f6f6d;
+            --accent-dark: #245654;
+            --danger: #b4443a;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #14181c;
+                --panel: #1c2228;
+                --text: #e6ebf0;
+                --muted: #93a0ad;
+                --line: #2d363f;
+                --accent: #4fa7a3;
+                --accent-dark: #67bdb9;
+                --danger: #e0766b;
+            }
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 32px 16px 64px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+            line-height: 1.5;
+        }
+        .wrap { max-width: 1040px; margin: 0 auto; }
+        h1 { font-size: 1.75rem; margin: 0 0 4px; }
+        .sub { color: var(--muted); margin: 0 0 24px; }
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .panel h2 { font-size: 1.1rem; margin: 0 0 16px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px 16px;
+        }
+        label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: 4px; }
+        input, select {
+            width: 100%;
+            padding: 9px 10px;
+            font: inherit;
+            color: var(--text);
+            background: var(--bg);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+        }
+        input:focus, select:focus, .btn:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 1px;
+        }
+        .actions { margin-top: 18px; display: flex; gap: 10px; align-items: center; }
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            font: inherit;
+            font-weight: 600;
+            border: 1px solid var(--accent);
+            border-radius: 6px;
+            background: var(--accent);
+            color: #fff;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+        .btn.ghost { background: transparent; color: var(--accent); }
+        .btn.ghost:hover { background: var(--bg); }
+        .btn.danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+        .btn.danger:hover { background: var(--danger); color: #fff; }
+        .btn.small { padding: 4px 10px; font-size: .85rem; }
+        .table-scroll { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+        th { font-size: .85rem; color: var(--muted); font-weight: 600; }
+        tr:last-child td { border-bottom: none; }
+        td.num, th.num { text-align: right; }
+        .row-actions { display: flex; gap: 8px; justify-content: flex-end; }
+        .row-actions form { margin: 0; }
+        .empty { text-align: center; color: var(--muted); padding: 28px 0; }
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: .8rem;
+            background: var(--bg);
+            border: 1px solid var(--line);
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <h1>Team members</h1>
+    <p class="sub">Add, edit and remove people in your team.</p>
+
+    <section class="panel">
+        <h2 th:text="${user.id == 0} ? 'Add a member' : 'Edit member'">Add a member</h2>
+
+        <form th:action="${user.id == 0} ? @{/users} : @{/users/update}"
+              th:object="${user}" method="post">
+
+            <input type="hidden" th:field="*{id}">
+
+            <div class="grid">
+                <div>
+                    <label for="name">First name</label>
+                    <input id="name" type="text" th:field="*{name}" required>
+                </div>
+                <div>
+                    <label for="surname">Last name</label>
+                    <input id="surname" type="text" th:field="*{surname}">
+                </div>
+                <div>
+                    <label for="age">Age</label>
+                    <input id="age" type="number" min="0" max="120" th:field="*{age}" required>
+                    <small th:if="${#fields.hasErrors('age')}" th:errors="*{age}" style="color: var(--danger)"></small>
+                </div>
+                <div>
+                    <label for="email">Email</label>
+                    <input id="email" type="email" th:field="*{email}" required>
+                    <small th:if="${#fields.hasErrors('email')}" th:errors="*{email}" style="color: var(--danger)"></small>
+                </div>
+                <div>
+                    <label for="position">Position</label>
+                    <input id="position" type="text" th:field="*{position}">
+                </div>
+                <div>
+                    <label for="salary">Salary</label>
+                    <input id="salary" type="number" min="0" step="0.01" th:field="*{salary}">
+                </div>
+                <div>
+                    <label for="employmentType">Employment type</label>
+                    <select id="employmentType" th:field="*{employmentType}">
+                        <option value="">Not specified</option>
+                        <option th:each="type : ${employmentTypes}"
+                                th:value="${type}"
+                                th:text="${type}">FULL_TIME</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="btn"
+                        th:text="${user.id == 0} ? 'Add member' : 'Save changes'">Add member</button>
+                <a th:if="${user.id != 0}" th:href="@{/users}" class="btn ghost">Cancel</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>All members</h2>
+        <div class="table-scroll">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th class="num">Age</th>
+                    <th>Email</th>
+                    <th>Position</th>
+                    <th class="num">Salary</th>
+                    <th>Employment</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(users)}">
+                    <td colspan="8" class="empty">No members yet. Add the first one above.</td>
+                </tr>
+                <tr th:each="u : ${users}">
+                    <td th:text="${u.id}">1</td>
+                    <td th:text="${u.name + ' ' + (u.surname != null ? u.surname : '')}">Jane Doe</td>
+                    <td class="num" th:text="${u.age}">30</td>
+                    <td th:text="${u.email}">jane@example.com</td>
+                    <td th:text="${u.position}">Developer</td>
+                    <td class="num" th:text="${u.salary != null} ? ${#numbers.formatDecimal(u.salary, 1, 'COMMA', 2, 'POINT')} : ''">0.00</td>
+                    <td><span class="badge" th:if="${u.employmentType != null}" th:text="${u.employmentType}">FULL_TIME</span></td>
+                    <td>
+                        <div class="row-actions">
+                            <a class="btn ghost small" th:href="@{/users/edit(id=${u.id})}">Edit</a>
+                            <form th:action="@{/users/delete(id=${u.id})}" method="post"
+                                  onsubmit="return confirm('Delete this member?');">
+                                <button type="submit" class="btn danger small">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+</body>
+</html>
