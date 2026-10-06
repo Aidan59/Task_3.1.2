@@ -1,11 +1,158 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Spring Security Example</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Profile</title>
+    <style>
+        :root {
+            --bg: #f3f5f7;
+            --panel: #ffffff;
+            --text: #1f2933;
+            --muted: #6b7785;
+            --line: #dde3ea;
+            --accent: #2f6f6d;
+            --accent-dark: #245654;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #14181c;
+                --panel: #1c2228;
+                --text: #e6ebf0;
+                --muted: #93a0ad;
+                --line: #2d363f;
+                --accent: #4fa7a3;
+                --accent-dark: #67bdb9;
+            }
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 32px 16px 64px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+            line-height: 1.5;
+        }
+        .wrap { max-width: 640px; margin: 0 auto; }
+        .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .top form { margin: 0; }
+        h1 { font-size: 1.6rem; margin: 0; }
+        .role {
+            display: inline-block;
+            margin-top: 4px;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: .8rem;
+            border: 1px solid var(--line);
+            color: var(--muted);
+        }
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 8px 20px;
+        }
+        dl { margin: 0; }
+        .row {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--line);
+        }
+        .row:last-child { border-bottom: none; }
+        dt { color: var(--muted); font-size: .9rem; }
+        dd { margin: 0; word-break: break-word; }
+        .empty { color: var(--muted); }
+        .btn {
+            display: inline-block;
+            padding: 7px 14px;
+            font: inherit;
+            font-weight: 600;
+            color: var(--accent);
+            background: transparent;
+            border: 1px solid var(--accent);
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn:hover { background: var(--bg); color: var(--accent-dark); }
+        .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+        @media (max-width: 480px) { .row { grid-template-columns: 1fr; gap: 2px; } }
+    </style>
 </head>
 <body>
-<h1>User, welcome spring boot security page!</h1>
+<div class="wrap">
+    <div class="top">
+        <div>
+            <h1 th:text="${user.name + ' ' + (user.surname != null ? user.surname : '')}">Jane Doe</h1>
+            <span class="role" th:each="r : ${user.roles}" th:text="${#strings.replace(r.name, 'ROLE_', '')}">USER</span>
+        </div>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="btn">Sign out</button>
+        </form>
+    </div>
 
-
+    <section class="panel">
+        <dl>
+            <div class="row">
+                <dt>ID</dt>
+                <dd th:text="${user.id}">1</dd>
+            </div>
+            <div class="row">
+                <dt>First name</dt>
+                <dd th:text="${user.name}">Jane</dd>
+            </div>
+            <div class="row">
+                <dt>Last name</dt>
+                <dd>
+                    <span th:if="${user.surname != null and !#strings.isEmpty(user.surname)}" th:text="${user.surname}">Doe</span>
+                    <span class="empty" th:unless="${user.surname != null and !#strings.isEmpty(user.surname)}">Not specified</span>
+                </dd>
+            </div>
+            <div class="row">
+                <dt>Age</dt>
+                <dd th:text="${user.age}">30</dd>
+            </div>
+            <div class="row">
+                <dt>Email</dt>
+                <dd>
+                    <span th:if="${user.email != null}" th:text="${user.email}">jane@example.com</span>
+                    <span class="empty" th:unless="${user.email != null}">Not specified</span>
+                </dd>
+            </div>
+            <div class="row">
+                <dt>Position</dt>
+                <dd>
+                    <span th:if="${user.position != null and !#strings.isEmpty(user.position)}" th:text="${user.position}">Developer</span>
+                    <span class="empty" th:unless="${user.position != null and !#strings.isEmpty(user.position)}">Not specified</span>
+                </dd>
+            </div>
+            <div class="row">
+                <dt>Salary</dt>
+                <dd>
+                    <span th:if="${user.salary != null}"
+                          th:text="${#numbers.formatDecimal(user.salary, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                    <span class="empty" th:unless="${user.salary != null}">Not specified</span>
+                </dd>
+            </div>
+            <div class="row">
+                <dt>Employment type</dt>
+                <dd>
+                    <span th:if="${user.employmentType != null}" th:text="${user.employmentType}">FULL_TIME</span>
+                    <span class="empty" th:unless="${user.employmentType != null}">Not specified</span>
+                </dd>
+            </div>
+            <div class="row">
+                <dt>Roles</dt>
+                <dd>
+                    <span th:each="r, rStat : ${user.roles}" th:text="${#strings.replace(r.name, 'ROLE_', '')} + ${rStat.last ? '' : ', '}">USER</span>
+                    <span class="empty" th:if="${#lists.isEmpty(user.roles)}">Not assigned</span>
+                </dd>
+            </div>
+        </dl>
+    </section>
+</div>
 </body>
 </html>
